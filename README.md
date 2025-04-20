@@ -116,6 +116,7 @@ Here's what's planned for future versions:
 <!---<a href="https://www.linkedin.com/in/apaarmat12/">
 <img src="https://media.licdn.com/dms/image/v2/D4D03AQG8jfHC9w2drw/profile-displayphoto-shrink_400_400/B4DZYW0U75GwAg-/0/1744139538850?e=1750291200&v=beta&t=-ErFjedrIxt3CJlBTrq70gDnvR1TxKsyMWZtbEcm8ec" width="200px;"
 alt="Apaar's Profile"/>
-</a>--->
-<br>
-&emsp;<a href="https://github.com/A-TomMarvoloRiddle"><b>Apaar Mathur (A-TomMarvoloRiddle)</b></a>
+</a>
+<br>--->
+<a href="https://www.linkedin.com/in/apaarmat12/">Apaar Mathur</a> :
+<a href="https://github.com/A-TomMarvoloRiddle">A-TomMarvoloRiddle</a>
