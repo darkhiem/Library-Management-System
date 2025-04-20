@@ -5,10 +5,14 @@
     <div class="section-container">
         <h2>Search</h2>
         <div class="form-group">
-            <input type="text" id="bookSearch" class="table-filter" data-table="booksTable" placeholder="Search for books...">
+            <input type="text" id="bookSearch" name="book_search" placeholder="Search for books...">
+            <button type="button" onclick="ajaxBookSearch()">Search</button>
+            <div id="bookSearchResults"></div>
         </div>
         <div class="form-group">
-            <input type="text" id="studentSearch" class="table-filter" data-table="studentsTable" placeholder="Search for students...">
+            <input type="text" id="studentSearch" name="student_search" placeholder="Search for students...">
+            <button type="button" onclick="ajaxStudentSearch()">Search</button>
+            <div id="studentSearchResults"></div>
         </div>
     </div>
 
@@ -266,4 +270,44 @@
             toggleSection('overdue_books');
         <?php endif; ?>
     });
+
+    // AJAX book search function
+    function ajaxBookSearch() {
+        var query = document.getElementById('bookSearch').value;
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'admin.php', true);
+        xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+        xhr.onload = function() {
+            if (this.status == 200) {
+                var results = JSON.parse(this.responseText);
+                var output = '<table><tr><th>ID</th><th>Title</th><th>Author</th><th>Publication Year</th></tr>';
+                for (var i = 0; i < results.length; i++) {
+                    output += '<tr><td>' + results[i].id + '</td><td>' + results[i].title + '</td><td>' + (results[i].author || 'N/A') + '</td><td>' + (results[i].publication_year || 'N/A') + '</td></tr>';
+                }
+                output += '</table>';
+                document.getElementById('bookSearchResults').innerHTML = output;
+            }
+        };
+        xhr.send('ajax_book_search=1&book_search=' + encodeURIComponent(query));
+    }
+
+    // AJAX student search function
+    function ajaxStudentSearch() {
+        var query = document.getElementById('studentSearch').value;
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'admin.php', true);
+        xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+        xhr.onload = function() {
+            if (this.status == 200) {
+                var results = JSON.parse(this.responseText);
+                var output = '<table><tr><th>ID</th><th>Username</th><th>Email</th></tr>';
+                for (var i = 0; i < results.length; i++) {
+                    output += '<tr><td>' + results[i].id + '</td><td>' + results[i].username + '</td><td>' + results[i].email + '</td></tr>';
+                }
+                output += '</table>';
+                document.getElementById('studentSearchResults').innerHTML = output;
+            }
+        };
+        xhr.send('ajax_student_search=1&student_search=' + encodeURIComponent(query));
+    }
 </script>
