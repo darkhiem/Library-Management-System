@@ -31,57 +31,41 @@ if (isset($_POST['create_student'])) {
     }
 }
 
+// Add new book
+if (isset($_POST['add_book'])) {
+    $title = $conn->real_escape_string($_POST['book_title']);
+    $author = $conn->real_escape_string($_POST['book_author']);
+    $isbn = $conn->real_escape_string($_POST['book_isbn']);
+    $year = $conn->real_escape_string($_POST['book_year']);
+    
+    $conn->query("INSERT INTO books (title, author, isbn, publication_year) VALUES ('$title', '$author', '$isbn', '$year')");
+    $success_message = "Book added successfully!";
+}
+
+// Get all students for display
+$students = $conn->query("SELECT id, username, email FROM users WHERE role = 'student'");
+
+// Get all books for display
+$books = $conn->query("SELECT * FROM books");
+
 // Delete student
 if (isset($_POST['delete_student'])) {
     $student_id = $_POST['student_id'];
     $conn->query("DELETE FROM users WHERE id = '$student_id' AND role = 'student'");
 }
 
-// AJAX book search
-if (isset($_POST['ajax_book_search'])) {
-    $book_search = $conn->real_escape_string($_POST['book_search']);
-    $result = $conn->query("SELECT id, title, author, publication_year FROM books WHERE available = TRUE AND (title LIKE '%$book_search%' OR author LIKE '%$book_search%' ')");
-    $books = [];
-    while ($row = $result->fetch_assoc()) {
-        $books[] = $row;
-    }
-    header('Content-Type: application/json');
-    echo json_encode($books);
-    exit;
+// Update student
+if (isset($_POST['update_student'])) {
+    $student_id = $conn->real_escape_string($_POST['student_id']);
+    $username = $conn->real_escape_string($_POST['edit_username']);
+    $email = $conn->real_escape_string($_POST['edit_email']);
+    $conn->query("UPDATE users SET username='$username', email='$email' WHERE id='$student_id' AND role='student'");
+    $success_message = "Student updated successfully!";
 }
-
-// AJAX student search
-if (isset($_POST['ajax_student_search'])) {
-    $student_search = $conn->real_escape_string($_POST['student_search']);
-    $result = $conn->query("SELECT id, username, email FROM users WHERE role = 'student' AND (username LIKE '%$student_search%' OR email LIKE '%$student_search%')");
-    $students = [];
-    while ($row = $result->fetch_assoc()) {
-        $students[] = $row;
-    }
-    header('Content-Type: application/json');
-    echo json_encode($students);
-    exit;
-}
-
-/*
-// Book search (non-AJAX)
-if (isset($_POST['book_search'])) {
-    $book_search = $conn->real_escape_string($_POST['book_search']);
-    $books = $conn->query("SELECT * FROM books WHERE available = TRUE AND (title LIKE '%$book_search%' OR author LIKE '%$book_search%' OR publication_year LIKE '%$book_search%')");
-} else {
-    $books = $conn->query("SELECT * FROM books WHERE available = TRUE");
-}
-
-// Student search (non-AJAX)
-if (isset($_POST['student_search'])) {
-    $student_search = $conn->real_escape_string($_POST['student_search']);
-    $students = $conn->query("SELECT id, username, email FROM users WHERE role = 'student' AND (username LIKE '%$student_search%' OR email LIKE '%$student_search%')");
-} else {
-    $students = $conn->query("SELECT id, username, email FROM users WHERE role = 'student'");
-}
-*/
 
 // Admin data queries
+$books = $conn->query("SELECT * FROM books WHERE available = TRUE");
 $admin_borrowed_books = $conn->query("SELECT bb.id AS borrowed_book_id, b.title, bb.due_date, u.username, bb.status, b.id AS book_id FROM borrowed_books bb JOIN books b ON bb.book_id = b.id JOIN users u ON bb.user_id = u.id");
 $overdue_books = $conn->query("SELECT b.title, bb.due_date, u.username, DATEDIFF(CURDATE(), bb.due_date) AS overdue_days FROM borrowed_books bb JOIN books b ON bb.book_id = b.id JOIN users u ON bb.user_id = u.id WHERE bb.due_date < CURDATE() AND bb.status = 'borrowed'");
+$students = $conn->query("SELECT id, username, email FROM users WHERE role = 'student'");
 ?>

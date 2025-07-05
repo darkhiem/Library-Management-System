@@ -1,3 +1,7 @@
+/**
+ * Library Management System JavaScript Functions
+ */
+
 // Toggle visibility of the section by ID
 function toggleSection(sectionId) {
     var section = document.getElementById(sectionId);
@@ -42,16 +46,6 @@ function validateEmail(email) {
 function confirmDelete(type) {
     return confirm('Are you sure you want to delete this ' + type + '? This action cannot be undone.');
 }
-
-// Submit book search form
-function submitBookSearch() {
-        document.getElementById('bookSearchForm').submit();
-    }
-    
-    // Submit student search form
-    function submitStudentSearch() {
-        document.getElementById('studentSearchForm').submit();
-    }
 
 // Filter table rows based on search input
 function filterTable(inputId, tableId) {

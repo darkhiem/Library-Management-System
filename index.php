@@ -26,10 +26,10 @@ if (isset($_SESSION['user'])) {
 
     <?php if (isset($_SESSION['user'])): ?>
         <!-- Show User Information -->
-        <div class="container">
-            <p>Welcome, <?php echo $_SESSION['user']; ?> (<?php echo ucfirst($_SESSION['role']); ?>)</p>
-            <form method="POST" style="text-align: right;">
-                <input type="submit" name="logout" value="Logout" style="background-color: red; color: white; padding: 10px; border-radius: 5px;">
+        <div class="welcome-section">
+            <p>Welcome, <strong><?php echo $_SESSION['user']; ?></strong> (<?php echo ucfirst($_SESSION['role']); ?>)</p>
+            <form method="POST" style="margin: 0;">
+                <input type="submit" name="logout" value="Logout" class="logout-btn">
             </form>
         </div>
 

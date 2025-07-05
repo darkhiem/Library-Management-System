@@ -1,9 +1,9 @@
 <div class="container">
-    <h1>Admin Dashboard</h1>
+    <h1>⚙️ Admin Dashboard</h1>
 
     <!-- Search Section -->
-    <div class="section-container">
-        <h2>Search</h2>
+    <div class="search-section">
+        <h2>🔍 Search</h2>
         <div class="form-group">
             <input type="text" id="bookSearch" name="book_search" placeholder="Search for books...">
             <button type="button" onclick="ajaxBookSearch()">Search</button>
@@ -17,7 +17,7 @@
     </div>
 
     <!-- Manage Students Section -->
-    <div class="link" onclick="toggleSection('manage_students')">Manage Students</div>
+    <div class="link" onclick="toggleSection('manage_students')">👥 Manage Students</div>
     <div id="manage_students" class="hidden section-container">
         <h2>Create New Student</h2>
         <?php if (isset($error_message)): ?>
@@ -50,24 +50,45 @@
                 <th>Email</th>
                 <th>Action</th>
             </tr>
-            <?php while ($student = $students->fetch_assoc()): ?>
-                <tr>
-                    <td><?php echo $student['id']; ?></td>
-                    <td><?php echo $student['username']; ?></td>
-                    <td><?php echo $student['email']; ?></td>
-                    <td>
-                        <form method="POST" style="display:inline;">
-                            <input type="hidden" name="student_id" value="<?php echo $student['id']; ?>">
-                            <input type="submit" name="delete_student" value="Delete" class="delete-btn" data-type="student" style="width:auto; padding:5px 10px; background-color:#d9534f;">
-                        </form>
-                    </td>
-                </tr>
-            <?php endwhile; ?>
+            <?php 
+            if ($students->num_rows > 0) {
+                while ($student = $students->fetch_assoc()): ?>
+                    <tr>
+                        <td><?php echo $student['id']; ?></td>
+                        <?php if (isset($_POST['edit_student_id']) && $_POST['edit_student_id'] == $student['id']): ?>
+                            <form method="POST" style="display:inline;">
+                                <td><input type="text" name="edit_username" value="<?php echo htmlspecialchars($student['username']); ?>" required></td>
+                                <td><input type="email" name="edit_email" value="<?php echo htmlspecialchars($student['email']); ?>" required></td>
+                                <td>
+                                    <input type="hidden" name="student_id" value="<?php echo $student['id']; ?>">
+                                    <input type="submit" name="update_student" value="Save" class="action-btn btn-borrow">
+                                    <input type="submit" name="cancel_edit" value="Cancel" class="action-btn btn-return">
+                                </td>
+                            </form>
+                        <?php else: ?>
+                            <td><?php echo $student['username']; ?></td>
+                            <td><?php echo $student['email']; ?></td>
+                            <td>
+                                <form method="POST" style="display:inline;">
+                                    <input type="hidden" name="student_id" value="<?php echo $student['id']; ?>">
+                                    <input type="submit" name="edit_student" value="Edit" class="action-btn btn-edit">
+                                </form>
+                                <form method="POST" style="display:inline;">
+                                    <input type="hidden" name="student_id" value="<?php echo $student['id']; ?>">
+                                    <input type="submit" name="delete_student" value="Delete" class="action-btn btn-delete">
+                                </form>
+                            </td>
+                        <?php endif; ?>
+                    </tr>
+                <?php endwhile;
+            } else { ?>
+                <tr><td colspan="4">No students found</td></tr>
+            <?php } ?>
         </table>
     </div>
 
     <!-- All Books List Section -->
-    <div class="link" onclick="toggleSection('all_books')">Manage Books</div>
+    <div class="link" onclick="toggleSection('all_books')">📚 Manage Books</div>
     <div id="all_books" class="hidden section-container">
         <h2>Available Books</h2>
         <table id="booksTable">
@@ -80,9 +101,8 @@
                 <th>Action</th>
             </tr>
             <?php
-            // Reset the result set pointer
-            $books->data_seek(0);
-            while ($book = $books->fetch_assoc()):
+            if ($books->num_rows > 0) {
+                while ($book = $books->fetch_assoc()):
             ?>
                 <tr>
                     <td><?php echo $book['id']; ?></td>
@@ -93,11 +113,15 @@
                     <td>
                         <form method="POST" style="display:inline;">
                             <input type="hidden" name="book_id" value="<?php echo $book['id']; ?>">
-                            <input type="submit" name="delete_book" value="Delete" class="delete-btn" data-type="book" style="width:auto; padding:5px 10px; background-color:#d9534f;">
+                            <input type="submit" name="delete_book" value="Delete" class="action-btn btn-delete">
                         </form>
                     </td>
                 </tr>
-            <?php endwhile; ?>
+            <?php 
+                endwhile;
+            } else { ?>
+                <tr><td colspan="6">No books found</td></tr>
+            <?php } ?>
         </table>
 
         <h2>Add New Book</h2>
@@ -123,7 +147,7 @@
     </div>
 
     <!-- Borrowed Books Section -->
-    <div class="link" onclick="toggleSection('borrowed_books')">Borrowed Books</div>
+    <div class="link" onclick="toggleSection('borrowed_books')">📖 Borrowed Books</div>
     <div id="borrowed_books" class="section-container">
         <h2>All Borrowed Books</h2>
         <table>
@@ -135,41 +159,46 @@
                 <th>Status</th>
                 <th>Action</th>
             </tr>
-            <?php while ($admin_borrowed_book = $admin_borrowed_books->fetch_assoc()): ?>
-                <tr>
-                    <td><?php echo $admin_borrowed_book['borrowed_book_id']; ?></td>
-                    <td><?php echo $admin_borrowed_book['title']; ?></td>
-                    <td class="due-date" data-date="<?php echo $admin_borrowed_book['due_date']; ?>">
-                        <?php echo $admin_borrowed_book['due_date']; ?>
-                    </td>
-                    <td><?php echo $admin_borrowed_book['username']; ?></td>
-                    <td class="status-indicator">
-                        <?php
-                        $due_date = new DateTime($admin_borrowed_book['due_date']);
-                        $today = new DateTime();
-                        $diff = $today->diff($due_date)->format("%r%a");
+            <?php 
+            if ($admin_borrowed_books->num_rows > 0) {
+                while ($admin_borrowed_book = $admin_borrowed_books->fetch_assoc()): ?>
+                    <tr>
+                        <td><?php echo $admin_borrowed_book['borrowed_book_id']; ?></td>
+                        <td><?php echo $admin_borrowed_book['title']; ?></td>
+                        <td class="due-date" data-date="<?php echo $admin_borrowed_book['due_date']; ?>">
+                            <?php echo $admin_borrowed_book['due_date']; ?>
+                        </td>
+                        <td><?php echo $admin_borrowed_book['username']; ?></td>
+                        <td class="status-indicator">
+                            <?php
+                            $due_date = new DateTime($admin_borrowed_book['due_date']);
+                            $today = new DateTime();
+                            $diff = $today->diff($due_date)->format("%r%a");
 
-                        if ($diff < 0) {
-                            echo '<span style="color:red;">Overdue by ' . abs($diff) . ' days</span>';
-                        } else {
-                            echo '<span style="color:green;">' . $diff . ' days remaining</span>';
-                        }
-                        ?>
-                    </td>
-                    <td>
-                        <form method="POST" style="display:inline;">
-                            <input type="hidden" name="borrowed_book_id" value="<?php echo $admin_borrowed_book['borrowed_book_id']; ?>">
-                            <input type="hidden" name="book_id" value="<?php echo $admin_borrowed_book['book_id']; ?>">
-                            <input type="submit" name="return_book" value="Return Book" style="width:auto; padding:5px 10px; background-color:#f0ad4e;">
-                        </form>
-                    </td>
-                </tr>
-            <?php endwhile; ?>
+                            if ($diff < 0) {
+                                echo '<span class="status-overdue">Overdue by ' . abs($diff) . ' days</span>';
+                            } else {
+                                echo '<span class="status-available">' . $diff . ' days remaining</span>';
+                            }
+                            ?>
+                        </td>
+                        <td>
+                            <form method="POST" style="display:inline;">
+                                <input type="hidden" name="borrowed_book_id" value="<?php echo $admin_borrowed_book['borrowed_book_id']; ?>">
+                                <input type="hidden" name="book_id" value="<?php echo $admin_borrowed_book['book_id']; ?>">
+                                <input type="submit" name="return_book" value="Return Book" class="action-btn btn-return">
+                            </form>
+                        </td>
+                    </tr>
+                <?php endwhile;
+            } else { ?>
+                <tr><td colspan="6">No borrowed books found</td></tr>
+            <?php } ?>
         </table>
     </div>
 
     <!-- Overdue Books Section -->
-    <div class="link" onclick="toggleSection('overdue_books')">Overdue Books</div>
+    <div class="link" onclick="toggleSection('overdue_books')">⚠️ Overdue Books</div>
     <div id="overdue_books" class="hidden section-container">
         <h2>Overdue Books</h2>
         <table>
@@ -180,25 +209,27 @@
                 <th>Days Overdue</th>
                 <th>Fine Amount</th>
             </tr>
-            <?php while ($overdue_book = $overdue_books->fetch_assoc()): ?>
-                <tr>
-                    <td><?php echo $overdue_book['title']; ?></td>
-                    <td><?php echo $overdue_book['due_date']; ?></td>
-                    <td><?php echo $overdue_book['username']; ?></td>
-                    <td><?php echo $overdue_book['overdue_days']; ?> days</td>
-                    <td><?php echo $overdue_book['overdue_days'] * 5; ?> INR</td>
-                </tr>
-            <?php endwhile; ?>
-            <?php if ($overdue_books->num_rows === 0): ?>
+            <?php 
+            if ($overdue_books->num_rows > 0) {
+                while ($overdue_book = $overdue_books->fetch_assoc()): ?>
+                    <tr>
+                        <td><?php echo $overdue_book['title']; ?></td>
+                        <td><?php echo $overdue_book['due_date']; ?></td>
+                        <td><?php echo $overdue_book['username']; ?></td>
+                        <td><?php echo $overdue_book['overdue_days']; ?> days</td>
+                        <td><?php echo $overdue_book['overdue_days'] * 5; ?> INR</td>
+                    </tr>
+                <?php endwhile;
+            } else { ?>
                 <tr>
                     <td colspan="5" style="text-align:center;">No overdue books at this time</td>
                 </tr>
-            <?php endif; ?>
+            <?php } ?>
         </table>
     </div>
 
     <!-- Reports Section -->
-    <div class="link" onclick="toggleSection('reports')">Reports</div>
+    <div class="link" onclick="toggleSection('reports')">📊 Reports</div>
     <div id="reports" class="hidden section-container">
         <h2>Library Statistics</h2>
 
@@ -212,7 +243,7 @@
         $available_books = $available_books_result->fetch_assoc()['available'];
 
         // Get borrowed books count
-        $borrowed_books_result = $conn->query("SELECT COUNT(*) as borrowed FROM borrowed_books");
+        $borrowed_books_result = $conn->query("SELECT COUNT(*) as borrowed FROM borrowed_books WHERE status = 'borrowed'");
         $borrowed_books_count = $borrowed_books_result->fetch_assoc()['borrowed'];
 
         // Get users count
@@ -220,43 +251,43 @@
         $users_count = $users_result->fetch_assoc()['total'];
 
         // Get overdue books count
-        $overdue_result = $conn->query("SELECT COUNT(*) as overdue FROM borrowed_books WHERE due_date < CURDATE()");
+        $overdue_result = $conn->query("SELECT COUNT(*) as overdue FROM borrowed_books WHERE due_date < CURDATE() AND status = 'borrowed'");
         $overdue_count = $overdue_result->fetch_assoc()['overdue'];
         ?>
 
-        <div style="display: flex; flex-wrap: wrap; justify-content: space-between;">
-            <div style="flex: 0 0 30%; background-color: #dff0d8; padding: 15px; margin: 10px; border-radius: 5px; text-align: center;">
-                <h3>Total Books</h3>
-                <p style="font-size: 24px; font-weight: bold;"><?php echo $total_books; ?></p>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>📚 Total Books</h3>
+                <p><?php echo $total_books; ?></p>
             </div>
 
-            <div style="flex: 0 0 30%; background-color: #d9edf7; padding: 15px; margin: 10px; border-radius: 5px; text-align: center;">
-                <h3>Available Books</h3>
-                <p style="font-size: 24px; font-weight: bold;"><?php echo $available_books; ?></p>
+            <div class="stat-card">
+                <h3>✅ Available Books</h3>
+                <p><?php echo $available_books; ?></p>
             </div>
 
-            <div style="flex: 0 0 30%; background-color: #fcf8e3; padding: 15px; margin: 10px; border-radius: 5px; text-align: center;">
-                <h3>Borrowed Books</h3>
-                <p style="font-size: 24px; font-weight: bold;"><?php echo $borrowed_books_count; ?></p>
+            <div class="stat-card">
+                <h3>📖 Borrowed Books</h3>
+                <p><?php echo $borrowed_books_count; ?></p>
             </div>
 
-            <div style="flex: 0 0 30%; background-color: #e8f5e9; padding: 15px; margin: 10px; border-radius: 5px; text-align: center;">
-                <h3>Total Students</h3>
-                <p style="font-size: 24px; font-weight: bold;"><?php echo $users_count; ?></p>
+            <div class="stat-card">
+                <h3>👥 Total Students</h3>
+                <p><?php echo $users_count; ?></p>
             </div>
 
-            <div style="flex: 0 0 30%; background-color: #ffebee; padding: 15px; margin: 10px; border-radius: 5px; text-align: center;">
-                <h3>Overdue Books</h3>
-                <p style="font-size: 24px; font-weight: bold;"><?php echo $overdue_count; ?></p>
+            <div class="stat-card">
+                <h3>⚠️ Overdue Books</h3>
+                <p><?php echo $overdue_count; ?></p>
             </div>
 
-            <div style="flex: 0 0 30%; background-color: #e0f7fa; padding: 15px; margin: 10px; border-radius: 5px; text-align: center;">
-                <h3>Total Fines</h3>
+            <div class="stat-card">
+                <h3>💰 Total Fines</h3>
                 <?php
-                $fines_result = $conn->query("SELECT SUM(DATEDIFF(CURDATE(), due_date) * 5) as total_fines FROM borrowed_books WHERE due_date < CURDATE()");
+                $fines_result = $conn->query("SELECT SUM(DATEDIFF(CURDATE(), due_date) * 5) as total_fines FROM borrowed_books WHERE due_date < CURDATE() AND status = 'borrowed'");
                 $total_fines = $fines_result->fetch_assoc()['total_fines'] ?: 0;
                 ?>
-                <p style="font-size: 24px; font-weight: bold;"><?php echo $total_fines; ?> INR</p>
+                <p><?php echo $total_fines; ?> INR</p>
             </div>
         </div>
     </div>
@@ -265,10 +296,8 @@
 <script>
     // Initialize the dashboard
     document.addEventListener('DOMContentLoaded', function() {
-        // Show overdue books section by default if there are overdue books
-        <?php if ($overdue_books->num_rows > 0): ?>
-            toggleSection('overdue_books');
-        <?php endif; ?>
+        // Show borrowed books section by default
+        toggleSection('borrowed_books');
     });
 
     // AJAX book search function

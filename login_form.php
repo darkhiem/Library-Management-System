@@ -1,11 +1,17 @@
 <div class="container">
-    <h1>Login</h1>
+    <h1>🔐 Library Management System</h1>
     <?php if (isset($error_message)): ?>
-        <p style="color: red; text-align: center;"><?php echo $error_message; ?></p>
+        <div class="error"><?php echo $error_message; ?></div>
     <?php endif; ?>
     <form method="POST">
-        <input type="text" name="username" placeholder="Username" required>
-        <input type="password" name="password" placeholder="Password" required>
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" placeholder="Enter your username" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+        </div>
         <input type="submit" name="login" value="Login">
     </form>
 </div>
